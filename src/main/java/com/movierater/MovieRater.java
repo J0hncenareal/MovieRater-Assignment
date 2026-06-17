@@ -8,11 +8,12 @@ import java.util.Scanner;
 public class MovieRater {
     private static final String DB_URL = "jdbc:sqlite:movierater.db";
 
-    public static void main(String[] args) {
-        initializeDatabase();
-        importDataFromCSV("/home/ubuntu/projects/software-engineering-4ca6fb76/movie_habits.csv");
-        runMenu();
-    }
+   public static void main(String[] args) {
+    initializeDatabase();
+    importDataFromCSV("movie_habits.csv"); 
+    runMenu();
+}
+
 
     private static void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL);
@@ -206,14 +207,31 @@ public class MovieRater {
 }
 
 
-    private static void showTotalUsersForMovie(Scanner scanner) {
+        private static void showTotalUsersForMovie(Scanner scanner) {
         System.out.print("Enter Movie ID: ");
         int id = scanner.nextInt();
         
-        // TODO: Implement the SQL query to count unique users for a specific movie
-        // Hint: SELECT COUNT(DISTINCT UserID) FROM ViewingHabit WHERE MovieID = ?
-        System.out.println("TODO: Implement showTotalUsersForMovie()");
+        // SQL query to count unique users who watched a specific movie
+        String sql = "SELECT COUNT(DISTINCT UserID) FROM ViewingHabit WHERE MovieID = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            // Set the Movie ID parameter in the query
+            pstmt.setInt(1, id);
+            
+            // Execute the query and get the result
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                System.out.println("Total unique users who watched Movie " + id + ": " + count);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error counting users for movie: " + e.getMessage());
+        }
     }
+
 
     private static void showTotalMinutes() {
         try (Connection conn = DriverManager.getConnection(DB_URL);
